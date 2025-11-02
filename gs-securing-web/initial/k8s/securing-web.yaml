@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: 'https://github.com/hant0505/dn-week8.git'
     targetRevision: main
-    path: initial/k8s
+    path: gs-securing-web/initial/k8s
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: default
