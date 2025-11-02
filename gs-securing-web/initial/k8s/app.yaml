@@ -1,113 +1,72 @@
-# ============ MYSQL DEPLOYMENT ============
----
+# ============ APP DEPLOYMENT ============
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mysql-deployment
+  name: securing-web-deployment
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: mysql
+      app: securing-web
   template:
     metadata:
       labels:
-        app: mysql
+        app: securing-web
     spec:
+      initContainers:
+      - name: wait-for-mysql
+        image: busybox:1.28
+        command: ['sh', '-c', 'until nc -z mysql-db 3306; do echo waiting for mysql; sleep 2; done;']
       containers:
-      - name: mysql
-        image: mysql:8.0
+      - name: securing-web
+        image: spring-k8s/securing-web:latest
+        imagePullPolicy: Never
         ports:
-        - containerPort: 3306
+        - containerPort: 8085
         env:
-        - name: MYSQL_ROOT_PASSWORD
+        - name: SPRING_DATASOURCE_URL
+          value: "jdbc:mysql://mysql-db:3306/week2"
+        - name: SPRING_DATASOURCE_USERNAME
+          value: "root"
+        - name: SPRING_DATASOURCE_PASSWORD
           value: "Thu ha123"
-        - name: MYSQL_DATABASE
-          value: "week2"
-        volumeMounts:
-        - name: mysql-storage
-          mountPath: /var/lib/mysql
+        - name: SPRING_JPA_HIBERNATE_DDL_AUTO
+          value: "update"
+        - name: SPRING_JPA_SHOW_SQL
+          value: "true"
+        - name: SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT
+          value: "org.hibernate.dialect.MySQLDialect"
         livenessProbe:
-          exec:
-            command:
-            - /bin/sh
-            - -c
-            - mysqladmin ping -h 127.0.0.1 -uroot -p"Thu ha123"
+          httpGet:
+            path: /login
+            port: 8085
           initialDelaySeconds: 30
           periodSeconds: 10
         readinessProbe:
-          exec:
-            command:
-            - /bin/sh
-            - -c
-            - mysqladmin ping -h 127.0.0.1 -uroot -p"Thu ha123"
-          initialDelaySeconds: 10
+          httpGet:
+            path: /login
+            port: 8085
+          initialDelaySeconds: 20
           periodSeconds: 5
-      volumes:
-      - name: mysql-storage
-        emptyDir: {}
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
 
-# ============ MYSQL SERVICE ============
+# ============ APP SERVICE ============
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: mysql-db
+  name: securing-web-service
 spec:
+  type: LoadBalancer
   selector:
-    app: mysql
+    app: securing-web
   ports:
-    - port: 3306
-      targetPort: 3306
-  type: ClusterIP
-
-
-# # ============ MYSQL DEPLOYMENT ============
-# ---
-# apiVersion: apps/v1
-# kind: Deployment
-# metadata:
-#   name: mysql-deployment
-# spec:
-#   replicas: 1
-#   selector:
-#     matchLabels:
-#       app: mysql
-#   template:
-#     metadata:
-#       labels:
-#         app: mysql
-#     spec:
-#       containers:
-#       - name: mysql
-#         image: mysql:8.0
-#         ports:
-#         - containerPort: 3306
-#         env:
-#         - name: MYSQL_ROOT_PASSWORD
-#           value: "Thu ha123"
-#         - name: MYSQL_DATABASE
-#           value: "week2"
-#         volumeMounts:
-#         - name: mysql-storage
-#           mountPath: /var/lib/mysql
-#         livenessProbe:
-#           exec:
-#             command:
-#             - /bin/sh
-#             - -c
-#             - mysqladmin ping -h localhost -uroot -p$MYSQL_ROOT_PASSWORD
-#           initialDelaySeconds: 30
-#           periodSeconds: 10
-#         readinessProbe:
-#           exec:
-#             command:
-#             - /bin/sh
-#             - -c
-#             - mysqladmin ping -h localhost -uroot -p"${MYSQL_ROOT_PASSWORD}"
-#           initialDelaySeconds: 10
-#           periodSeconds: 5
-#       volumes:
-#       - name: mysql-storage
-#         persistentVolumeClaim:
-#           claimName: mysql-pvc
+    - port: 8085
+      targetPort: 8085
+      protocol: TCP
