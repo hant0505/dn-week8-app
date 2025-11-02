@@ -40,13 +40,13 @@ spec:
           httpGet:
             path: /login
             port: 8085
-          initialDelaySeconds: 30
+          initialDelaySeconds: 60
           periodSeconds: 10
         readinessProbe:
           httpGet:
             path: /login
             port: 8085
-          initialDelaySeconds: 20
+          initialDelaySeconds: 60
           periodSeconds: 5
         resources:
           requests:
