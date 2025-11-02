@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: week8
+  name: securing-web
   namespace: argocd
 spec:
   project: default
