@@ -27,14 +27,12 @@ public class WebSecurityConfig {
                 .requestMatchers("/", "/home", "/register", "/css/**", "/js/**").permitAll()
                 // ⚡ Cho phép Alertmanager gọi webhook mà không cần login
                 .requestMatchers("/webhook").permitAll()
-                // Explicitly allow Prometheus scrape path (GET) so scrapers don't get redirected
-                .requestMatchers(org.springframework.http.HttpMethod.GET, "/actuator/prometheus").permitAll()
-                // Keep actuator wildcard as a fallback for other actuator endpoints you want public
+                            .requestMatchers("/actuator/prometheus").permitAll() // ✅ Bỏ HttpMethod.GET
                 .requestMatchers("/actuator/**").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN") // chỉ ADMIN mới vào
                 .anyRequest().authenticated()
             )
-            .httpBasic() // ✅ Allow HTTP Basic (useful for non-browser clients)
+            .httpBasic(Customizer.withDefaults()) // ✅ Dùng cú pháp mới
             .and()
             .formLogin(form -> form.loginPage("/login").permitAll())
             .logout((logout) -> logout.permitAll())
