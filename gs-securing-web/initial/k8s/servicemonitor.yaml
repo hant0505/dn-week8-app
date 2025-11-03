@@ -1,0 +1,17 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: securing-web-monitor
+  namespace: default
+  labels:
+    app: securing-web
+    release: kube-prometheus-stack  # ⚠️ Quan trọng cho Prometheus Operator
+spec:
+  selector:
+    matchLabels:
+      app: securing-web  # Match với Service labels
+  endpoints:
+    - port: http  # ⭐ Match với tên port trong Service
+      path: /actuator/prometheus
+      interval: 30s
+      scheme: http

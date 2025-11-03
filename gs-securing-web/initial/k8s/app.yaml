@@ -62,11 +62,27 @@ apiVersion: v1
 kind: Service
 metadata:
   name: securing-web-service
+  labels:
+    app: securing-web  # ⭐ Thêm label để ServiceMonitor match
 spec:
   type: LoadBalancer
   selector:
     app: securing-web
   ports:
-    - port: 8085
+    - name: http  # ⭐ THÊM DÒNG NÀY
+      port: 8085
       targetPort: 8085
       protocol: TCP
+#12H05 3_11
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: securing-web-service
+# spec:
+#   type: LoadBalancer
+#   selector:
+#     app: securing-web
+#   ports:
+#     - port: 8085
+#       targetPort: 8085
+#       protocol: TCP
