@@ -30,8 +30,12 @@ public class WebSecurityConfig {
                 .requestMatchers("/actuator/**").permitAll()    // <-- Quan trọng
             )
             .csrf(csrf -> csrf.disable())
-            .httpBasic(httpBasic -> {}); // Cho phép Prometheus scrape mà không cần login
-
+            .sessionManagement(sm -> sm.sessionCreationPolicy(
+                org.springframework.security.config.http.SessionCreationPolicy.STATELESS
+            ))
+            .httpBasic(httpBasic -> httpBasic.disable())
+            .formLogin(form -> form.disable())      // <--- QUAN TRỌNG
+            .logout(logout -> logout.disable());    // <--- QUAN TRỌNG
         return http.build();
     }
     
