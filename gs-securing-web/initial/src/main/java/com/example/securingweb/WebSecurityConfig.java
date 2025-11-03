@@ -33,7 +33,6 @@ public class WebSecurityConfig {
                 .anyRequest().authenticated()
             )
             .httpBasic(httpBasic -> {}) // ✅ Dùng cú pháp mới
-            .and()
             .formLogin(form -> form.loginPage("/login").permitAll())
             .logout((logout) -> logout.permitAll())
             // ⚠️ Tắt CSRF riêng cho webhook và prometheus scrape để POST/GET không bị 403
