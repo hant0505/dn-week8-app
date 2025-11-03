@@ -56,14 +56,15 @@ public class WebSecurityConfig {
     @Order(2)
     public SecurityFilterChain webhookSecurityFilterChain(HttpSecurity http) throws Exception {
         http
-            .securityMatcher("/webhook/**")
+            .securityMatcher("/webhook")
             .authorizeHttpRequests(auth -> auth
-                .anyRequest().permitAll()
+                .requestMatchers(HttpMethod.POST, "/webhook").permitAll()
+                .anyRequest().authenticated()
             )
             .csrf(csrf -> csrf.disable());
         return http.build();
     }
-
+    
     // 2. CHUỖI FILTER CHO Ứng Dụng Chính
     @Bean
     @Order(3)
