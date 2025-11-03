@@ -20,7 +20,7 @@ spec:
       containers:
       - name: securing-web
         image: spring-k8s/securing-web:latest
-        imagePullPolicy: Never
+        imagePullPolicy: IfNotPresent ##kodc never do argocd
         ports:
         - containerPort: 8085
         env:
