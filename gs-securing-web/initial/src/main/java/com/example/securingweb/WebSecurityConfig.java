@@ -33,7 +33,7 @@ public class WebSecurityConfig {
         // FIX LỖI: Không cần biến actuatorMatcher ở đây, dùng trực tiếp trong securityMatcher
         http
             // Dùng securityMatcher để chỉ định phạm vi của chuỗi filter này
-            .securityMatcher(AntPathRequestMatcher.antMatcher("/actuator/**"))
+            .securityMatcher(AntPathRequestMatcher.antMatcher("/actuator/**", "/webhook/**"))
             .authorizeHttpRequests(auth -> auth
                 .anyRequest().permitAll() // FIX: Cho phép TẤT CẢ request trong phạm vi /actuator/**
         )
