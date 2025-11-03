@@ -32,7 +32,7 @@ public class WebSecurityConfig {
                 .requestMatchers("/admin/**").hasRole("ADMIN") // chỉ ADMIN mới vào
                 .anyRequest().authenticated()
             )
-            .httpBasic(Customizer.withDefaults()) // ✅ Dùng cú pháp mới
+            .httpBasic(httpBasic -> {}) // ✅ Dùng cú pháp mới
             .and()
             .formLogin(form -> form.loginPage("/login").permitAll())
             .logout((logout) -> logout.permitAll())
