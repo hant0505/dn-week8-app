@@ -26,8 +26,12 @@ public class WebSecurityConfig {
     public SecurityFilterChain actuatorFilterChain(HttpSecurity http) throws Exception {
         http
             .securityMatcher("/actuator/**")  // Chỉ apply cho /actuator/**
-            .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
-            .csrf(csrf -> csrf.disable());
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/actuator/**").permitAll()    // <-- Quan trọng
+            )
+            .csrf(csrf -> csrf.disable())
+            .httpBasic(httpBasic -> {}); // Cho phép Prometheus scrape mà không cần login
+
         return http.build();
     }
     
