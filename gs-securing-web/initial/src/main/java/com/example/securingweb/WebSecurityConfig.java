@@ -33,9 +33,7 @@ public class WebSecurityConfig {
         http
             .securityMatcher("/actuator/**") // hoặc "**" nếu muốn bao phủ nhiều path
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/actuator/**").permitAll()
-                .requestMatchers("/webhook/**").permitAll()
-                .anyRequest().authenticated()
+                .anyRequest().permitAll()
             )
             .csrf(csrf -> csrf.disable());
 
@@ -53,8 +51,22 @@ public class WebSecurityConfig {
     //     return http.build();
     // }
 
+    // 2️⃣ Chuỗi cho Webhook
+    @Bean
+    @Order(2)
+    public SecurityFilterChain webhookSecurityFilterChain(HttpSecurity http) throws Exception {
+        http
+            .securityMatcher("/webhook/**")
+            .authorizeHttpRequests(auth -> auth
+                .anyRequest().permitAll()
+            )
+            .csrf(csrf -> csrf.disable());
+        return http.build();
+    }
+
     // 2. CHUỖI FILTER CHO Ứng Dụng Chính
     @Bean
+    @Order(3)
     public SecurityFilterChain applicationSecurityFilterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(auth -> auth
