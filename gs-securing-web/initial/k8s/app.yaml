@@ -19,7 +19,7 @@ spec:
         command: ['sh', '-c', 'until nc -z mysql-db 3306; do echo waiting for mysql; sleep 2; done;']
       containers:
       - name: securing-web
-        image: spring-k8s/securing-web:latest
+        image: hant0505/dn-week8-app:146fab7d1fdd50c471fc65115245f40981ef127f
         imagePullPolicy: IfNotPresent ##kodc never do argocd
         ports:
         - containerPort: 8085
