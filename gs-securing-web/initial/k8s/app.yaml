@@ -19,7 +19,7 @@ spec:
         command: ['sh', '-c', 'until nc -z mysql-db 3306; do echo waiting for mysql; sleep 2; done;']
       containers:
       - name: securing-web
-        image: hant0505/dn-week8-app:146fab7d1fdd50c471fc65115245f40981ef127f
+        image: hant0505/dn-week8-app:latest
         imagePullPolicy: Always ##kodc never do argocd
         ports:
         - containerPort: 8085
