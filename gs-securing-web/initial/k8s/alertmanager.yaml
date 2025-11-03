@@ -16,5 +16,5 @@ stringData:
     receivers:
       - name: demo-webhook
         webhook_configs:
-          - url: http://localhost:8585/webhook
+          - url: http://localhost:8085/webhook
             send_resolved: true
