@@ -20,37 +20,14 @@ public class WebSecurityConfig {
         this.userDetailsService = userDetailsService;
     }
     
-    // ⭐ Filter chain #1: Actuator endpoints (priority cao nhất)
+        // Mọi request được permitAll(), CSRF disabled để dễ test
     @Bean
-    @Order(1)
-    public SecurityFilterChain actuatorFilterChain(HttpSecurity http) throws Exception {
-        http
-            .securityMatcher("/actuator/**")  // Chỉ apply cho /actuator/**
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/actuator/**").permitAll()    // <-- Quan trọng
-            )
-            .csrf(csrf -> csrf.disable())
-            .httpBasic(httpBasic -> {}); // Cho phép Prometheus scrape mà không cần login
-
-        return http.build();
-    }
-    
-    // ⭐ Filter chain #2: Main application (priority thấp hơn)
-    @Bean
-    @Order(2)
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .authorizeHttpRequests((requests) -> requests
-                .requestMatchers("/", "/home", "/register", "/css/**", "/js/**").permitAll()
-                // ⚡ Cho phép Alertmanager gọi webhook mà không cần login
-                .requestMatchers("/webhook").permitAll()
-                .requestMatchers("/admin/**").hasRole("ADMIN")
-                .anyRequest().authenticated()
+            .authorizeHttpRequests(auth -> auth
+                .anyRequest().permitAll()
             )
-            .httpBasic(httpBasic -> {})
-            .formLogin(form -> form.loginPage("/login").permitAll())
-            .logout(logout -> logout.permitAll())
-            .csrf(csrf -> csrf.ignoringRequestMatchers("/webhook"));
+            .csrf(csrf -> csrf.disable());
         return http.build();
     }
     
