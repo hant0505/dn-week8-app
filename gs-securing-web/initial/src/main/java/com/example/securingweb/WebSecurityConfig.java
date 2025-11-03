@@ -28,18 +28,30 @@ public class WebSecurityConfig {
     // 1. CHUỖI FILTER CHO ACTUATOR (Ưu tiên cao nhất)
     // Sẽ cho phép truy cập Actuator công khai, giải quyết lỗi 302
     @Bean
-    @Order(1) 
-    public SecurityFilterChain actuatorSecurityFilterChain(HttpSecurity http) throws Exception {
-        // FIX LỖI: Không cần biến actuatorMatcher ở đây, dùng trực tiếp trong securityMatcher
+    @Order(1)
+    public SecurityFilterChain actuatorAndWebhookSecurityFilterChain(HttpSecurity http) throws Exception {
         http
-            // Dùng securityMatcher để chỉ định phạm vi của chuỗi filter này
-            .securityMatcher(AntPathRequestMatcher.antMatcher("/actuator/**", "/webhook/**"))
+            .securityMatcher("/actuator/**") // hoặc "**" nếu muốn bao phủ nhiều path
             .authorizeHttpRequests(auth -> auth
-                .anyRequest().permitAll() // FIX: Cho phép TẤT CẢ request trong phạm vi /actuator/**
-        )
-        .csrf(csrf -> csrf.disable());
+                .requestMatchers("/actuator/**").permitAll()
+                .requestMatchers("/webhook/**").permitAll()
+                .anyRequest().authenticated()
+            )
+            .csrf(csrf -> csrf.disable());
+
         return http.build();
     }
+    // public SecurityFilterChain actuatorSecurityFilterChain(HttpSecurity http) throws Exception {
+    //     // FIX LỖI: Không cần biến actuatorMatcher ở đây, dùng trực tiếp trong securityMatcher
+    //     http
+    //         // Dùng securityMatcher để chỉ định phạm vi của chuỗi filter này
+    //         .securityMatcher(AntPathRequestMatcher.antMatcher("/actuator/**", "/webhook/**"))
+    //         .authorizeHttpRequests(auth -> auth
+    //             .anyRequest().permitAll() // FIX: Cho phép TẤT CẢ request trong phạm vi /actuator/**
+    //     )
+    //     .csrf(csrf -> csrf.disable());
+    //     return http.build();
+    // }
 
     // 2. CHUỖI FILTER CHO Ứng Dụng Chính
     @Bean
