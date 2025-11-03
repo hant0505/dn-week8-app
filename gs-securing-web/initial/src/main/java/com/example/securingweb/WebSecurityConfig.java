@@ -30,14 +30,14 @@ public class WebSecurityConfig {
     @Bean
     @Order(1) 
     public SecurityFilterChain actuatorSecurityFilterChain(HttpSecurity http) throws Exception {
-        AntPathRequestMatcher actuatorMatcher = AntPathRequestMatcher.antMatcher("/actuator/**");
-
+        // FIX LỖI: Không cần biến actuatorMatcher ở đây, dùng trực tiếp trong securityMatcher
         http
-            .securityMatcher(actuatorMatcher) 
+            // Dùng securityMatcher để chỉ định phạm vi của chuỗi filter này
+            .securityMatcher(AntPathRequestMatcher.antMatcher("/actuator/**"))
             .authorizeHttpRequests(auth -> auth
-                .requestMatcher(actuatorMatcher).permitAll() // Actuator luôn được phép truy cập
-            )
-            .csrf(csrf -> csrf.disable()); 
+                .anyRequest().permitAll() // FIX: Cho phép TẤT CẢ request trong phạm vi /actuator/**
+        )
+        .csrf(csrf -> csrf.disable());
         return http.build();
     }
 
