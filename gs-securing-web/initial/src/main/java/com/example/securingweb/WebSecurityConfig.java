@@ -6,34 +6,73 @@ import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer.FrameOptionsConfig;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
 public class WebSecurityConfig {
     
+    // Khai báo CustomUserDetailsService qua constructor nếu cần thiết cho authProvider
+    // Nếu bạn không muốn sử dụng DaoAuthenticationProvider, bạn có thể comment lại phần này
     // private final CustomUserDetailsService userDetailsService;
     
     // public WebSecurityConfig(CustomUserDetailsService userDetailsService) {
-    //     this.userDetailsService = userDetailsService;
+    //      this.userDetailsService = userDetailsService;
     // }
-    
-        // Mọi request được permitAll(), CSRF disabled để dễ test
+
+    // 1. CHUỖI FILTER CHO ACTUATOR (Ưu tiên cao nhất)
+    // Sẽ cho phép truy cập Actuator công khai, giải quyết lỗi 302
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    @Order(1) 
+    public SecurityFilterChain actuatorSecurityFilterChain(HttpSecurity http) throws Exception {
+        AntPathRequestMatcher actuatorMatcher = AntPathRequestMatcher.antMatcher("/actuator/**");
+
+        http
+            .securityMatcher(actuatorMatcher) 
+            .authorizeHttpRequests(auth -> auth
+                .requestMatcher(actuatorMatcher).permitAll() // Actuator luôn được phép truy cập
+            )
+            .csrf(csrf -> csrf.disable()); 
+        return http.build();
+    }
+
+    // 2. CHUỖI FILTER CHO Ứng Dụng Chính
+    @Bean
+    public SecurityFilterChain applicationSecurityFilterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(auth -> auth
-                .anyRequest().permitAll()
+                .requestMatchers("/register").permitAll() 
+                .requestMatchers("/js/**", "/css/**", "/images/**").permitAll() 
+                .anyRequest().authenticated() // Mọi request khác đều yêu cầu xác thực
             )
-            .csrf(csrf -> csrf.disable())
-            .httpBasic(httpBasic -> {}); // Cho phép truy cập HTTP Basic nếu cần
+            .csrf(Customizer.withDefaults()) 
+            .formLogin(form -> form
+                .loginPage("/login")
+                .permitAll()
+            )
+            .logout(logout -> logout
+                .permitAll()
+            )
+            .httpBasic(Customizer.withDefaults()); 
+            
         return http.build();
     }
     
+    // 3. BEAN BẮT BUỘC CHO AUTHCONTROLLER VÀ XÁC THỰC
+    
+    @Bean // <--- KHÔNG ĐƯỢC COMMENT: CẦN THIẾT CHO AuthController
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+    
+    /* UNCOMMENT nếu bạn muốn cấu hình xác thực custom dựa trên DB */
     // @Bean
-    // public DaoAuthenticationProvider authProvider() {
+    // public DaoAuthenticationProvider authProvider(CustomUserDetailsService userDetailsService) {
     //     DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
     //     authProvider.setUserDetailsService(userDetailsService);
     //     authProvider.setPasswordEncoder(passwordEncoder());
@@ -41,13 +80,8 @@ public class WebSecurityConfig {
     // }
     
     // @Bean
-    // public PasswordEncoder passwordEncoder() {
-    //     return new BCryptPasswordEncoder();
-    // }
-    
-    // @Bean
     // public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-    //     return config.getAuthenticationManager();
+    //      return config.getAuthenticationManager();
     // }
 }
 

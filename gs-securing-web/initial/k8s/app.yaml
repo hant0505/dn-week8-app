@@ -20,7 +20,7 @@ spec:
       containers:
       - name: securing-web
         image: hant0505/dn-week8-app:146fab7d1fdd50c471fc65115245f40981ef127f
-        imagePullPolicy: IfNotPresent ##kodc never do argocd
+        imagePullPolicy: Always ##kodc never do argocd
         ports:
         - containerPort: 8085
         env:
@@ -38,11 +38,23 @@ spec:
           value: "org.hibernate.dialect.MySQLDialect"
         livenessProbe:
           httpGet:
+            path: /actuator/health # NÊN dùng health check
+            port: 8085
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          
+          httpGet:
             path: /login
             port: 8085
           initialDelaySeconds: 60
           periodSeconds: 10
         readinessProbe:
+          httpGet:
+            path: /actuator/health # NÊN dùng health check
+            port: 8085
+          initialDelaySeconds: 60
+          periodSeconds: 5
+          
           httpGet:
             path: /login
             port: 8085
