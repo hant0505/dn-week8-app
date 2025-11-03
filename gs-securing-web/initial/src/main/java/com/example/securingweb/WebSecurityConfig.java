@@ -27,6 +27,7 @@ public class WebSecurityConfig {
                 .requestMatchers("/", "/home", "/register", "/css/**", "/js/**").permitAll()
                 // ⚡ Cho phép Alertmanager gọi webhook mà không cần login
                 .requestMatchers("/webhook").permitAll()
+                .requestMatchers("/actuator/**").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN") // chỉ ADMIN mới vào
                 .anyRequest().authenticated()
             )
@@ -36,8 +37,8 @@ public class WebSecurityConfig {
             )
             .logout((logout) -> logout.permitAll())
             // ⚠️ Tắt CSRF riêng cho webhook để POST JSON không bị 403
-            .csrf(csrf -> csrf.ignoringRequestMatchers("/webhook"));
-
+            .csrf(csrf -> csrf.ignoringRequestMatchers("/webhook"))
+                        .httpBasic(); // ✅ Cho phép dùng curl không bị redirect            .httpBasic(); // ✅ Cho phép dùng curl không bị redirect
         return http.build();
     }
 
