@@ -65,10 +65,10 @@ public class WebSecurityConfig {
     
     // 3. BEAN BẮT BUỘC CHO AUTHCONTROLLER VÀ XÁC THỰC
     
-    @Bean // <--- KHÔNG ĐƯỢC COMMENT: CẦN THIẾT CHO AuthController
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+    // @Bean // <--- KHÔNG ĐƯỢC COMMENT: CẦN THIẾT CHO AuthController
+    // public PasswordEncoder passwordEncoder() {
+    //     return new BCryptPasswordEncoder();
+    // }
     
     /* UNCOMMENT nếu bạn muốn cấu hình xác thực custom dựa trên DB */
     // @Bean
