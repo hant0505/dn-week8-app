@@ -23,28 +23,25 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .authorizeHttpRequests(auth -> auth
+            .authorizeHttpRequests((requests) -> requests
                 .requestMatchers("/", "/home", "/register", "/css/**", "/js/**").permitAll()
+                // ⚡ Cho phép Alertmanager gọi webhook mà không cần login
                 .requestMatchers("/webhook").permitAll()
-
-            // ✅ Mở toàn bộ Actuator cho Prometheus
                 .requestMatchers("/actuator/**").permitAll()
-
-                .requestMatchers("/admin/**").hasRole("ADMIN")
+                .requestMatchers("/admin/**").hasRole("ADMIN") // chỉ ADMIN mới vào
                 .anyRequest().authenticated()
             )
-            .csrf(csrf -> csrf.ignoringRequestMatchers("/webhook", "/actuator/**")) // ✅ tắt CSRF cho actuator
-            .httpBasic() // ✅ Cho phép gọi bằng curl, không bị redirect
-            .formLogin(form -> form
+            .httpBasic() // ✅ Cho phép dùng curl không bị redirect            .httpBasic(); // ✅ Cho phép dùng curl không bị redirect
+
+            .formLogin((form) -> form
                 .loginPage("/login")
                 .permitAll()
             )
-            .logout(logout -> logout.permitAll());
-
+            .logout((logout) -> logout.permitAll())
+            // ⚠️ Tắt CSRF riêng cho webhook để POST JSON không bị 403
+            .csrf(csrf -> csrf.ignoringRequestMatchers("/actuator/**", "/webhook"));
         return http.build();
     }
-
-
 
     @Bean
     public DaoAuthenticationProvider authProvider() {
