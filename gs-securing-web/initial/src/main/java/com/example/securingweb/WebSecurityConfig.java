@@ -32,8 +32,8 @@ public class WebSecurityConfig {
                 .anyRequest().authenticated()
             )
             .httpBasic() // ✅ Cho phép dùng curl không bị redirect
-                .loginPage("/login")
-                .permitAll()
+            .and()
+            .formLogin(form -> form.loginPage("/login").permitAll())
             .logout((logout) -> logout.permitAll())
             // ⚠️ Tắt CSRF riêng cho webhook để POST JSON không bị 403
             .csrf(csrf -> csrf.ignoringRequestMatchers("/actuator/**", "/webhook"));
