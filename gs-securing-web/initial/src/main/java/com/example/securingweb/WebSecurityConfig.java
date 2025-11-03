@@ -14,11 +14,11 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 @Configuration
 public class WebSecurityConfig {
     
-    private final CustomUserDetailsService userDetailsService;
+    // private final CustomUserDetailsService userDetailsService;
     
-    public WebSecurityConfig(CustomUserDetailsService userDetailsService) {
-        this.userDetailsService = userDetailsService;
-    }
+    // public WebSecurityConfig(CustomUserDetailsService userDetailsService) {
+    //     this.userDetailsService = userDetailsService;
+    // }
     
         // Mọi request được permitAll(), CSRF disabled để dễ test
     @Bean
@@ -27,27 +27,28 @@ public class WebSecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .anyRequest().permitAll()
             )
-            .csrf(csrf -> csrf.disable());
+            .csrf(csrf -> csrf.disable())
+            .httpBasic(httpBasic -> {}); // Cho phép truy cập HTTP Basic nếu cần
         return http.build();
     }
     
-    @Bean
-    public DaoAuthenticationProvider authProvider() {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(userDetailsService);
-        authProvider.setPasswordEncoder(passwordEncoder());
-        return authProvider;
-    }
+    // @Bean
+    // public DaoAuthenticationProvider authProvider() {
+    //     DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+    //     authProvider.setUserDetailsService(userDetailsService);
+    //     authProvider.setPasswordEncoder(passwordEncoder());
+    //     return authProvider;
+    // }
     
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+    // @Bean
+    // public PasswordEncoder passwordEncoder() {
+    //     return new BCryptPasswordEncoder();
+    // }
     
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager();
-    }
+    // @Bean
+    // public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+    //     return config.getAuthenticationManager();
+    // }
 }
 
 // package com.example.securingweb;
