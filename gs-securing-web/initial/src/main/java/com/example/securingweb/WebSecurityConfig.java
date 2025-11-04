@@ -28,18 +28,38 @@ public class WebSecurityConfig {
 
     // 1. CHUỖI FILTER CHO ACTUATOR (Ưu tiên cao nhất)
     // Sẽ cho phép truy cập Actuator công khai, giải quyết lỗi 302
+
     @Bean
     @Order(1)
     public SecurityFilterChain actuatorAndWebhookSecurityFilterChain(HttpSecurity http) throws Exception {
         http
-            .securityMatcher("/actuator/**") // hoặc "**" nếu muốn bao phủ nhiều path
+            .securityMatcher(new OrRequestMatcher(
+                new AntPathRequestMatcher("/actuator/**"),
+                new AntPathRequestMatcher("/webhook")
+            ))
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/actuator/**", "/webhook").permitAll()
                 .anyRequest().permitAll()
             )
             .csrf(csrf -> csrf.disable());
 
         return http.build();
     }
+    
+    /*GIỮ */
+    // @Bean
+    // @Order(1)
+    // public SecurityFilterChain actuatorAndWebhookSecurityFilterChain(HttpSecurity http) throws Exception {
+    //     http
+    //         .securityMatcher("/actuator/**") // hoặc "**" nếu muốn bao phủ nhiều path
+    //         .authorizeHttpRequests(auth -> auth
+    //             .anyRequest().permitAll()
+    //         )
+    //         .csrf(csrf -> csrf.disable());
+
+    //     return http.build();
+    // }
+    /* */
     // public SecurityFilterChain actuatorSecurityFilterChain(HttpSecurity http) throws Exception {
     //     // FIX LỖI: Không cần biến actuatorMatcher ở đây, dùng trực tiếp trong securityMatcher
     //     http
@@ -51,20 +71,6 @@ public class WebSecurityConfig {
     //     .csrf(csrf -> csrf.disable());
     //     return http.build();
     // }
-
-    // 2️⃣ Chuỗi cho Webhook
-    @Bean
-    @Order(2)
-    public SecurityFilterChain webhookSecurityFilterChain(HttpSecurity http) throws Exception {
-        http
-            .securityMatcher("/webhook")
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers(HttpMethod.POST, "/webhook").permitAll()
-                .anyRequest().authenticated()
-            )
-            .csrf(csrf -> csrf.disable());
-        return http.build();
-    }
     
     // 2. CHUỖI FILTER CHO Ứng Dụng Chính
     @Bean
