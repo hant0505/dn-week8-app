@@ -1,3 +1,4 @@
+# nơi gửi alert đi đâu -> webhook
 apiVersion: v1
 kind: Secret
 metadata:
@@ -16,5 +17,5 @@ stringData:
     receivers:
       - name: demo-webhook
         webhook_configs:
-          - url: http://localhost:8085/webhook
+          - url: http://securing-web.default.svc.cluster.local/webhook
             send_resolved: true

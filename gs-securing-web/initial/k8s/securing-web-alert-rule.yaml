@@ -1,0 +1,60 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: securing-web-full-alerts
+  namespace: kube-prometheus-stack
+  labels:
+    release: kube-prometheus-stack
+spec:
+  groups:
+  - name: securing-web.rules
+    rules:
+      # 1. App DOWN
+      - alert: SecuringWebDown
+        expr: up{app="securing-web"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Ứng dụng securing-web không hoạt động"
+          description: "Prometheus không scrape được ứng dụng trong 1 phút."
+
+      # 2. HTTP 5xx
+      - alert: SecuringWeb_HighErrorRate
+        expr: rate(http_server_requests_seconds_count{app="securing-web", status=~"5.."}[2m]) > 0.5
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Ứng dụng securing-web đang bị lỗi 5xx cao"
+          description: "Tỷ lệ request lỗi > 0.5 req/second trong 1 phút."
+
+      # 3. CPU > 80%
+      - alert: SecuringWebHighCPU
+        expr: sum(rate(container_cpu_usage_seconds_total{pod=~"securing-web.*"}[2m])) by (pod) / sum(kube_pod_container_resource_limits_cpu_cores{pod=~"securing-web.*"}) by (pod) > 0.8
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Pod CPU > 80%"
+          description: "Pod {{ $labels.pod }} đang sử dụng CPU cao."
+
+      # 4. Memory > 80%
+      - alert: SecuringWebHighMemory
+        expr: sum(container_memory_working_set_bytes{pod=~"securing-web.*"}) by (pod) / sum(kube_pod_container_resource_limits_memory_bytes{pod=~"securing-web.*"}) by (pod) > 0.8
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Pod Memory > 80%"
+          description: "Pod {{ $labels.pod }} đang sử dụng Memory cao."
+
+      # 5. Pod restart nhiều
+      - alert: SecuringWebPodRestarts
+        expr: increase(kube_pod_container_status_restarts_total{pod=~"securing-web.*"}[5m]) > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Pod restart nhiều"
+          description: "Pod {{ $labels.pod }} restart nhiều lần trong 5 phút."

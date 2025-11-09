@@ -14,6 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
 
 @Configuration
 public class WebSecurityConfig {
@@ -21,7 +22,7 @@ public class WebSecurityConfig {
     // Khai báo CustomUserDetailsService qua constructor nếu cần thiết cho authProvider
     // Nếu bạn không muốn sử dụng DaoAuthenticationProvider, bạn có thể comment lại phần này
     // private final CustomUserDetailsService userDetailsService;
-    
+
     // public WebSecurityConfig(CustomUserDetailsService userDetailsService) {
     //      this.userDetailsService = userDetailsService;
     // }
@@ -29,18 +30,22 @@ public class WebSecurityConfig {
     // 1. CHUỖI FILTER CHO ACTUATOR (Ưu tiên cao nhất)
     // Sẽ cho phép truy cập Actuator công khai, giải quyết lỗi 302
 
+        // 1) Chain ưu tiên: Actuator + Webhook (public, CSRF disabled)
     @Bean
     @Order(1)
     public SecurityFilterChain actuatorAndWebhookSecurityFilterChain(HttpSecurity http) throws Exception {
         http
+            // match đúng các path cần public
             .securityMatcher(new OrRequestMatcher(
                 new AntPathRequestMatcher("/actuator/**"),
-                new AntPathRequestMatcher("/webhook")
+                // bao cả /webhook và /webhook/* nếu bạn có subpaths
+                new AntPathRequestMatcher("/webhook"),
+                new AntPathRequestMatcher("/webhook/**")
             ))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/actuator/**", "/webhook").permitAll()
                 .anyRequest().permitAll()
             )
+            // Alertmanager gửi POST không có CSRF token => disable CSRF cho các path này
             .csrf(csrf -> csrf.disable());
 
         return http.build();
