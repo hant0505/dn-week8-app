@@ -17,5 +17,5 @@ stringData:
     receivers:
       - name: demo-webhook
         webhook_configs:
-          - url: http://securing-web.default.svc.cluster.local/webhook
+          - url: http://securing-web-service.default.svc.cluster.local/webhook
             send_resolved: true
