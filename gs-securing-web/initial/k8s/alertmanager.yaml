@@ -19,3 +19,5 @@ stringData:
         webhook_configs:
           - url: http://securing-web-service.default.svc.cluster.local/webhook
             send_resolved: true
+            http_config:
+              timeout: 40s
